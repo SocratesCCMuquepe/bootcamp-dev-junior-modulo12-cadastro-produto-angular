@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Form, FormBuilder, FormGroup } from '@angular/forms';
 import { Category } from 'src/app/interfaces/category';
 import { Product } from 'src/app/interfaces/product';
 
@@ -12,18 +13,32 @@ export class ProductComponent {
   categories: Category[] = [];
 
   @Input()
-  product ?: Product;
+  product: Product = {} as Product;
 
   @Output()
   saveEmitter = new EventEmitter()
 
-  save(){
-      this.saveEmitter.emit(true);
+  formGroupProduct: FormGroup;
+
+  constructor(formBuilder: FormBuilder) {
+    this.formGroupProduct = formBuilder.group({
+      id: [''],
+      name: [''],
+      description: [''],
+      price: 0,
+      category: [''],
+      newProduct: [''],
+      promotion: ['']
+    });
   }
-  cancel(){
-      this.saveEmitter.emit(false);
+  save() {
+    Object.assign(this.product, this.formGroupProduct.value);
+    this.saveEmitter.emit(true);
   }
-  selectedCategory(category1: Category, category2: Category){
+  cancel() {
+    this.saveEmitter.emit(false);
+  }
+  selectedCategory(category1: Category, category2: Category) {
     return category1 && category2 ? category1.id === category2.id : false;
   }
 
