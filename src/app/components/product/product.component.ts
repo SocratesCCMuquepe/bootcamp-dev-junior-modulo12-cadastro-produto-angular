@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Form, FormBuilder, FormGroup } from '@angular/forms';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Form, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Category } from 'src/app/interfaces/category';
 import { Product } from 'src/app/interfaces/product';
 
@@ -8,7 +8,7 @@ import { Product } from 'src/app/interfaces/product';
   templateUrl: './product.component.html',
   styleUrls: ['./product.component.css']
 })
-export class ProductComponent {
+export class ProductComponent implements OnChanges {
   @Input()
   categories: Category[] = [];
 
@@ -22,18 +22,26 @@ export class ProductComponent {
 
   constructor(formBuilder: FormBuilder) {
     this.formGroupProduct = formBuilder.group({
-      id: [''],
-      name: [''],
-      description: [''],
-      price: 0,
-      category: [''],
+      id: { value: '', disabled: true },
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      description: ['', [Validators.required]],
+      price: ['', [Validators.required]],
+      category: ['', [Validators.required]],
       newProduct: [''],
       promotion: ['']
     });
   }
+
+  ngOnChanges(): void {
+    if (this.product)
+      this.formGroupProduct.patchValue(this.product);
+  }
+
   save() {
-    Object.assign(this.product, this.formGroupProduct.value);
-    this.saveEmitter.emit(true);
+    if (this.formGroupProduct.valid) {
+      Object.assign(this.product, this.formGroupProduct.value);
+      this.saveEmitter.emit(true);
+    }
   }
   cancel() {
     this.saveEmitter.emit(false);
@@ -41,5 +49,10 @@ export class ProductComponent {
   selectedCategory(category1: Category, category2: Category) {
     return category1 && category2 ? category1.id === category2.id : false;
   }
+
+  get pfgname() { return this.formGroupProduct.get('name'); }
+  get pfgdescription() { return this.formGroupProduct.get('description'); }
+  get pfgprice() { return this.formGroupProduct.get('price'); }
+  get pfgcategory() { return this.formGroupProduct.get('category'); }
 
 }
